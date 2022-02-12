@@ -1,6 +1,7 @@
 package com.example.springgraphqlserver.services;
 
 import com.example.springgraphqlserver.types.Product;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,6 +12,9 @@ import java.util.List;
 @Service
 public class ProductService {
     private List<Product> productsList;
+
+    @Autowired
+    ProductPublisher productPublisher;
 
     public ProductService() {
         this.productsList = new ArrayList(Arrays.asList(new Product(1, "Book"), new Product(2, "Cup"),
@@ -27,16 +31,20 @@ public class ProductService {
     }
 
     public Product addProduct(String content) {
-        if (this.productsList.add(new Product(this.getHighestId() + 1, content)))
-            return new Product(this.getHighestId() + 1, content);
-
+        Product toAdd = new Product(this.getHighestId() + 1, content);
+        if (this.productsList.add(toAdd)) {
+            productPublisher.publish("Added " + toAdd);
+            return toAdd;
+        }
         return null;
     }
 
     public Product deleteProduct(int id) {
         Product toDelete = this.productsList.stream().filter(p -> p.getId() == id).findFirst().get();
-        if (this.productsList.remove(toDelete))
+        if (this.productsList.remove(toDelete)) {
+            productPublisher.publish("Deleted " + toDelete);
             return toDelete;
+        }
 
         return null;
     }

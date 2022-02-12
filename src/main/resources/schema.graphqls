@@ -12,3 +12,7 @@ type Mutation {
     addProduct(content: String!): Product
     deleteProduct(id: Int!): Product
 }
+
+type Subscription {
+    productChanges: String!
+}
