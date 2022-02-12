@@ -24,4 +24,8 @@ public class Product {
     public void setId(int id) {
         this.id = id;
     }
+
+    public String toString() {
+        return "Product { id: " + id + ", content: " + content + " }";
+    }
 }

@@ -6,5 +6,9 @@ type Product {
 type Query {
     getAllProducts: [Product]
     getProduct(id: Int!): Product
-    addProduct(content: String!): Boolean!
+}
+
+type Mutation {
+    addProduct(content: String!): Product
+    deleteProduct(id: Int!): Product
 }
