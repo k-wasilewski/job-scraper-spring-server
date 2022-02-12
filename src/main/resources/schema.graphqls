@@ -1,7 +1,10 @@
-type Message {
+type Product {
+    id: Int!
     content: String!
 }
 
 type Query {
-    hello: Message
+    getAllProducts: [Product]
+    getProduct(id: Int!): Product
+    addProduct(content: String!): Boolean!
 }

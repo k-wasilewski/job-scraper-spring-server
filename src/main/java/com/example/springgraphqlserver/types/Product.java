@@ -1,11 +1,12 @@
 package com.example.springgraphqlserver.types;
 
-public class Message {
+public class Product {
+    private int id;
     private String content;
 
-    public Message withContent(String content) {
+    public Product (int id, String content) {
+        this.id = id;
         this.content = content;
-        return this;
     }
 
     public String getContent() {
@@ -14,5 +15,13 @@ public class Message {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
