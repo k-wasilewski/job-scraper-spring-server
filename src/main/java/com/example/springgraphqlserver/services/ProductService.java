@@ -1,8 +1,10 @@
 package com.example.springgraphqlserver.services;
 
+import com.example.springgraphqlserver.repositories.ProductMongoRepository;
 import com.example.springgraphqlserver.repositories.ProductRepository;
 import com.example.springgraphqlserver.types.Product;
 import com.example.springgraphqlserver.types.ProductOperation;
+import com.example.springgraphqlserver.types.ProductWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ public class ProductService {
     MongoTemplate mongoTemplate;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    ProductMongoRepository productMongoRepository;
 
     public ProductService() {
         this.productsList = new ArrayList(Arrays.asList(new Product(1, "Book"), new Product(2, "Cup"),
@@ -41,8 +45,9 @@ public class ProductService {
         Product toAdd = new Product(this.getHighestId() + 1, content);
         if (this.productsList.add(toAdd)) {
             productPublisher.publish("Added " + toAdd);
+            productRepository.save(new ProductWrapper(toAdd, ProductOperation.ADD));
             mongoTemplate.save(toAdd.withOperation(ProductOperation.ADD));
-            productRepository.save(toAdd.withOperation(ProductOperation.ADD));
+            productMongoRepository.save(toAdd.withOperation(ProductOperation.ADD));
             return toAdd;
         }
         return null;
@@ -52,8 +57,9 @@ public class ProductService {
         Product toDelete = this.productsList.stream().filter(p -> p.getId() == id).findFirst().get();
         if (this.productsList.remove(toDelete)) {
             productPublisher.publish("Deleted " + toDelete);
+            productRepository.save(new ProductWrapper(toDelete, ProductOperation.DELETE));
             mongoTemplate.save(toDelete.withOperation(ProductOperation.DELETE));
-            productRepository.save(toDelete.withOperation(ProductOperation.DELETE));
+            productMongoRepository.save(toDelete.withOperation(ProductOperation.DELETE));
             return toDelete;
         }
 

@@ -1,8 +1,10 @@
 package com.example.springgraphqlserver.repositories;
 
-import com.example.springgraphqlserver.types.Product;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import com.example.springgraphqlserver.types.ProductWrapper;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-public interface ProductRepository extends MongoRepository <Product, Integer> {
+@Repository
+public interface ProductRepository extends CrudRepository <ProductWrapper, Long> {
 
 }
