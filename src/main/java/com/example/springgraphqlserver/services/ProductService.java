@@ -46,7 +46,7 @@ public class ProductService {
         if (this.productsList.add(toAdd)) {
             productPublisher.publish("Added " + toAdd);
             productRepository.save(new ProductWrapper(toAdd, ProductOperation.ADD));
-            mongoTemplate.save(toAdd.withOperation(ProductOperation.ADD));
+            mongoTemplate.insert(toAdd.withOperation(ProductOperation.ADD));
             productMongoRepository.save(toAdd.withOperation(ProductOperation.ADD));
             return toAdd;
         }
@@ -58,7 +58,7 @@ public class ProductService {
         if (this.productsList.remove(toDelete)) {
             productPublisher.publish("Deleted " + toDelete);
             productRepository.save(new ProductWrapper(toDelete, ProductOperation.DELETE));
-            mongoTemplate.save(toDelete.withOperation(ProductOperation.DELETE));
+            mongoTemplate.insert(toDelete.withOperation(ProductOperation.DELETE));
             productMongoRepository.save(toDelete.withOperation(ProductOperation.DELETE));
             return toDelete;
         }
