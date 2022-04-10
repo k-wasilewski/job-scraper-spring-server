@@ -27,11 +27,12 @@ public class ScrapeRequestsSender {
             con.setDoOutput(true);
 
             String jsonInputString = "{ \"query\": \"mutation { scrape(host: \\\"" + host + "\\\", path: \\\"" + path + "\\\", jobAnchorSelector: \\\"" + jobAnchorSelector + "\\\", jobLinkContains: \\\"" + jobLinkContains + "\\\", numberOfPages: " + numberOfPages + ") { complete } }\" }";
+
             try (OutputStream os = con.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
-            System.out.println(con.getResponseCode());
+
             return new Date();
         } catch (Exception e) {
             System.out.println("performScrapeRequest error: " + e);
