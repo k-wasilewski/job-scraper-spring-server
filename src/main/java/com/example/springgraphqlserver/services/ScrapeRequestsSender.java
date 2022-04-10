@@ -37,7 +37,7 @@ public class ScrapeRequestsSender {
                 os.write(input, 0, input.length);
             }
 
-            return new Date();
+            if (con.getResponseCode() == 200) return new Date();
         } catch (Exception e) {
             System.out.println("performScrapeRequest error: " + e);
         }
