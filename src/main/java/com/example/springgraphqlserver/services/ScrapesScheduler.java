@@ -21,7 +21,7 @@ public class ScrapesScheduler {
     PagePublisher pagePublisher;
 
     @Scheduled(fixedRate = 60000)
-    public void checkScrapesToPerform() {
+    public void checkScrapesToPerform() {//TODO: remove mock pages, uncomment read&modify pages at mongodb
         List<Page> pages = new ArrayList<>();
         Page p1 = new Page();
         p1.setHost("https://myhost.com");
@@ -46,7 +46,7 @@ public class ScrapesScheduler {
             if (page.getLastScrapePerformed() == null || new Date().getTime() - page.getLastScrapePerformed().getTime() > page.getInterval()) {
                 scrapeRequestsSender.performScrapeRequest(page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages());
                 page.setLastScrapePerformed(new Date());
-                mongoTemplate.save(page);
+                //mongoTemplate.save(page);
                 pagePublisher.publish(new Date().toString());
             }
         });
