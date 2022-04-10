@@ -1,6 +1,5 @@
 package com.example.springgraphqlserver.services;
 
-import com.example.springgraphqlserver.types.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +25,12 @@ public class ScrapeRequestsSender {
             con.setRequestProperty("Accept", "*");
             con.setDoOutput(true);
 
-            String jsonInputString = "{ \"query\": \"mutation { scrape(host: \\\"" + host + "\\\", path: \\\"" + path + "\\\", jobAnchorSelector: \\\"" + jobAnchorSelector + "\\\", jobLinkContains: \\\"" + jobLinkContains + "\\\", numberOfPages: " + numberOfPages + ") { complete } }\" }";
+            String _host = host.replaceAll("\"", "&quot");
+            String _path = path.replaceAll("\"", "&quot");
+            String _jobAnchorSelector = jobAnchorSelector.replaceAll("\"", "&quot");
+            String _jobLinkContains = jobLinkContains.replaceAll("\"", "&quot");
+
+            String jsonInputString = "{ \"query\": \"mutation { scrape(host: \\\"" + _host + "\\\", path: \\\"" + _path + "\\\", jobAnchorSelector: \\\"" + _jobAnchorSelector + "\\\", jobLinkContains: \\\"" + _jobLinkContains + "\\\", numberOfPages: " + numberOfPages + ") { complete } }\" }";
 
             try (OutputStream os = con.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes("utf-8");
