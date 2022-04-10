@@ -1,6 +1,6 @@
-package com.example.springgraphqlserver.repositories;
+package com.example.jobscraperspringserver.repositories;
 
-import com.example.springgraphqlserver.types.ProductWrapper;
+import com.example.jobscraperspringserver.types.ProductWrapper;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

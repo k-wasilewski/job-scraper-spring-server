@@ -1,4 +1,4 @@
-package com.example.springgraphqlserver.config;
+package com.example.jobscraperspringserver.config;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = "com.example.springgraphqlserver.repositories")
+@EnableMongoRepositories(basePackages = "com.example.jobscraperspringserver.repositories")
 public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Override

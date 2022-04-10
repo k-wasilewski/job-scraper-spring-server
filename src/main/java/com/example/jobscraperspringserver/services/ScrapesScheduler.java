@@ -1,6 +1,6 @@
-package com.example.springgraphqlserver.services;
+package com.example.jobscraperspringserver.services;
 
-import com.example.springgraphqlserver.types.Page;
+import com.example.jobscraperspringserver.types.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;

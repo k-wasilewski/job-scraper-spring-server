@@ -1,4 +1,4 @@
-package com.example.springgraphqlserver;
+package com.example.jobscraperspringserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

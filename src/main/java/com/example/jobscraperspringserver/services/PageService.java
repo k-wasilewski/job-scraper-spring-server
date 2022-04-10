@@ -1,10 +1,6 @@
-package com.example.springgraphqlserver.services;
+package com.example.jobscraperspringserver.services;
 
-import com.example.springgraphqlserver.types.Page;
-import com.example.springgraphqlserver.types.Product;
-import com.example.springgraphqlserver.types.ProductOperation;
-import com.example.springgraphqlserver.types.ProductWrapper;
-import com.mongodb.client.result.DeleteResult;
+import com.example.jobscraperspringserver.types.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -12,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PageService {

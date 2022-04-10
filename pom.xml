@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>spring-graphql-server</artifactId>
+    <artifactId>job-scraper-spring-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-graphql-server</name>
-    <description>spring-graphql-server</description>
+    <name>job-scraper-spring-server</name>
+    <description>job-scraper-spring-server</description>
     <properties>
         <java.version>11</java.version>
     </properties>

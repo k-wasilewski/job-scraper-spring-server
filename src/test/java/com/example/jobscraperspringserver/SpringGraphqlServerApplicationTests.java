@@ -1,4 +1,4 @@
-package com.example.springgraphqlserver;
+package com.example.jobscraperspringserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

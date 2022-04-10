@@ -1,10 +1,10 @@
-package com.example.springgraphqlserver.services;
+package com.example.jobscraperspringserver.services;
 
-import com.example.springgraphqlserver.repositories.ProductMongoRepository;
-import com.example.springgraphqlserver.repositories.ProductRepository;
-import com.example.springgraphqlserver.types.Product;
-import com.example.springgraphqlserver.types.ProductOperation;
-import com.example.springgraphqlserver.types.ProductWrapper;
+import com.example.jobscraperspringserver.repositories.ProductMongoRepository;
+import com.example.jobscraperspringserver.repositories.ProductRepository;
+import com.example.jobscraperspringserver.types.Product;
+import com.example.jobscraperspringserver.types.ProductOperation;
+import com.example.jobscraperspringserver.types.ProductWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;

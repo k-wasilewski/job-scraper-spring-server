@@ -1,4 +1,4 @@
-package com.example.springgraphqlserver.types;
+package com.example.jobscraperspringserver.types;
 
 import org.springframework.data.annotation.Id;
 

@@ -1,10 +1,8 @@
-package com.example.springgraphqlserver.resolvers;
+package com.example.jobscraperspringserver.resolvers;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
-import com.example.springgraphqlserver.services.PageService;
-import com.example.springgraphqlserver.services.ProductService;
-import com.example.springgraphqlserver.types.Page;
-import com.example.springgraphqlserver.types.Product;
+import com.example.jobscraperspringserver.services.PageService;
+import com.example.jobscraperspringserver.types.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

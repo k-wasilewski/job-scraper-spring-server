@@ -1,4 +1,4 @@
-package com.example.springgraphqlserver.config;
+package com.example.jobscraperspringserver.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
