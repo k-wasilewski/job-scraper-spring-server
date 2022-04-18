@@ -1,8 +1,3 @@
-type Product {
-    id: Int!
-    content: String!
-}
-
 type Page {
     id: Int!
     host: String
@@ -14,20 +9,15 @@ type Page {
 }
 
 type Query {
-    getAllProducts: [Product]
-    getProduct(id: Int!): Product
     getPages: [Page]
 }
 
 type Mutation {
-    addProduct(content: String!): Product
-    deleteProduct(id: Int!): Product
     addPage(host: String!, path: String!, jobAnchorSelector: String!, jobLinkContains: String!, numberOfPages: Int!, interval: Int!): Page
     deletePage(id: Int!): Page
     modifyPage(id: Int!, host: String!, path: String!, jobAnchorSelector: String!, jobLinkContains: String!, numberOfPages: Int!, interval: Int!): Page
 }
 
 type Subscription {
-    productChanges: String!
     scrapesPerformed: String!
 }
