@@ -3,6 +3,7 @@ package com.example.jobscraperspringserver.config;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.example.jobscraperspringserver.utils.HostUtils;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -15,6 +16,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoRepositories(basePackages = "com.example.jobscraperspringserver.repositories")
 public class MongoConfig extends AbstractMongoClientConfiguration {
 
+    private final String MONGODB_ENDPOINT = HostUtils.pingHost("localhost", 27017, 3000) ? "mongodb://localhost:27017/test" : "mongodb://mongodb:27017/test";
+
     @Override
     protected String getDatabaseName() {
         return "scraping_db";
@@ -22,7 +25,7 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Override
     public MongoClient mongoClient() {
-        ConnectionString connectionString = new ConnectionString("mongodb://localhost:27017/test");
+        ConnectionString connectionString = new ConnectionString(MONGODB_ENDPOINT);
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
                 .applyConnectionString(connectionString)
                 .build();
