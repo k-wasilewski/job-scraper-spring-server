@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoRepositories(basePackages = "com.example.jobscraperspringserver.repositories")
 public class MongoConfig extends AbstractMongoClientConfiguration {
 
-    private final String MONGODB_ENDPOINT = HostUtils.pingHost("localhost", 27017, 3000) ? "mongodb://localhost:27017/test" : "mongodb://mongodb:27017/test";
+    private final String MONGODB_ENDPOINT = HostUtils.pingHost("localhost", 27017, 3000) ? "mongodb://sa:password@localhost:27017/test?authSource=admin" : "mongodb://sa:password@mongodb:27017/test?authSource=admin";
 
     @Override
     protected String getDatabaseName() {
