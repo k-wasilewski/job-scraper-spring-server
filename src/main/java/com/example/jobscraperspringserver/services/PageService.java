@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -15,27 +14,7 @@ public class PageService {
     MongoTemplate mongoTemplate;
 
     public List<Page> getPages() {
-        List<Page> mockPages = new ArrayList<>();
-        Page p1 = new Page();
-        p1.setHost("https://myhost.com");
-        p1.setPath("/jobs/reactnspring");
-        p1.setJobLinkContains("");
-        p1.setJobAnchorSelector("a");
-        p1.setNumberOfPages(1);
-        p1.setId(1);
-        p1.setInterval(2000);
-        mockPages.add(p1);
-        Page p2 = new Page();
-        p2.setHost("https://otherhost.pl");
-        p2.setPath("/get_jobs/react/spring/get");
-        p2.setJobLinkContains("");
-        p2.setJobAnchorSelector("li[class*=\"job\"]");
-        p2.setNumberOfPages(1);
-        p2.setId(2);
-        p2.setInterval(1000);
-        mockPages.add(p2);
-        return mockPages;
-        //return mongoTemplate.findAll(Page.class);
+        return mongoTemplate.findAll(Page.class);
     }
 
     public Page deletePage(int id) {

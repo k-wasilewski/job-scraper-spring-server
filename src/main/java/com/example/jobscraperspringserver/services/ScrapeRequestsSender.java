@@ -1,6 +1,5 @@
 package com.example.jobscraperspringserver.services;
 
-import com.example.jobscraperspringserver.utils.HostUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,7 @@ public class ScrapeRequestsSender {
     @Autowired
     PageService pageService;
 
-    private final String NODE_SERVER_ENDPOINT = HostUtils.pingHost("localhost", 8080, 3000) ? "http://localhost:8080/graphql" : "http://job-scraper-node-server:8080/graphql";
+    private final String NODE_SERVER_ENDPOINT = "http://job-scraper-node-server:8080/graphql";
 
     public Date performScrapeRequest(String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages) {
         try {
