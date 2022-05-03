@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class PageService {
@@ -38,6 +39,10 @@ public class PageService {
     }
 
     private int getHighestId() {
-        return getPages().stream().max(Comparator.comparing(Page::getId)).get().getId();
+        try {
+            return getPages().stream().max(Comparator.comparing(Page::getId)).get().getId();
+        } catch (NoSuchElementException e) {
+            return 0;
+        }
     }
 }
