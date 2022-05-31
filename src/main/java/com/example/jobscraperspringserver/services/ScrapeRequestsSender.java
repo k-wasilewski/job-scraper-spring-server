@@ -23,6 +23,7 @@ public class ScrapeRequestsSender {
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Accept", "*");
+            con.setRequestProperty("Origin", "job-scraper-spring-server:8081");
             con.setDoOutput(true);
 
             String _host = host.replaceAll("\"", "&quot");

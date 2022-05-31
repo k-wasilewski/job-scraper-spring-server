@@ -15,4 +15,4 @@ ARG JAR_FILE=/app/target/job-scraper-spring-server-0.0.1-SNAPSHOT.jar
 
 COPY --from=build ${JAR_FILE} job-scraper-spring-server.jar
 
-ENTRYPOINT ["java","-jar","/job-scraper-spring-server.jar"]
+ENTRYPOINT ["java","-Dsun.net.http.allowRestrictedHeaders=true","-jar","/job-scraper-spring-server.jar"]
