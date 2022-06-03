@@ -2,6 +2,8 @@ package com.example.jobscraperspringserver.security;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -68,7 +70,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private String getCookieValue(HttpServletRequest req, String cookieName) {
+    private String getCookieValue(HttpServletRequest req, String cookieName) throws IOException {
+        System.out.println(req.getRequestURI());
+        System.out.println(req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+        System.out.println(req.getCookies().length);
+
         return Arrays.stream(req.getCookies())
                 .filter(c -> c.getName().equals(cookieName))
                 .findFirst()
