@@ -11,7 +11,7 @@ import io.jsonwebtoken.Jwts;
 
 @Component
 public class JwtTokenUtil implements Serializable {
-    private String JWT_SECRET = "UYGgyugf896tGhgOGkjh76G";
+    public static final String JWT_SECRET = "UYGgyugf896tGhgOGkjh76G";
 
     public String getEmailFromToken(String token) {
         return getClaimFromToken(token, claims -> claims.get("email", String.class));

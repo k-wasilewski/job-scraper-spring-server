@@ -19,17 +19,35 @@ public class ScrapesScheduler {
     ScrapeRequestsSender scrapeRequestsSender;
     @Autowired
     PagePublisher pagePublisher;
+    private static String JWT_TOKEN;
+    private static Date JWT_TOKEN_EXPIRATION;
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000, initialDelay = 80000)
     public void checkScrapesToPerform() {
         List<Page> pages = mongoTemplate.findAll(Page.class);
         pages.stream().forEach(page -> {
             if (page.getLastScrapePerformed() == null || new Date().getTime() - page.getLastScrapePerformed().getTime() > page.getInterval()) {
-                scrapeRequestsSender.performScrapeRequest(page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages());
+                scrapeRequestsSender.performScrapeRequest(JWT_TOKEN, page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages());
                 page.setLastScrapePerformed(new Date());
                 mongoTemplate.save(page);
                 pagePublisher.publish(new Date().toString());
             }
         });
+    }
+
+    @Scheduled(fixedRate = 60000, initialDelay = 20000)
+    public void checkAuthorization() {
+        if (JWT_TOKEN_EXPIRATION == null || is5minBefore(JWT_TOKEN_EXPIRATION)) {
+            List<Object> tokenExp = scrapeRequestsSender.login();
+            if (tokenExp != null) {
+                JWT_TOKEN = (String) tokenExp.get(0);
+                JWT_TOKEN_EXPIRATION = (Date) tokenExp.get(1);
+            }
+        }
+    }
+
+    private boolean is5minBefore(Date expiration) {
+        long diff = expiration.getTime() - new Date().getTime();
+        return diff < 5 * 60 * 1000;
     }
 }
