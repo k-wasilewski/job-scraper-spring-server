@@ -70,11 +70,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private String getCookieValue(HttpServletRequest req, String cookieName) throws IOException {
-        System.out.println(req.getRequestURI());
-        System.out.println(req.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
-        System.out.println(req.getCookies().length);
-
+    private String getCookieValue(HttpServletRequest req, String cookieName) {
         return Arrays.stream(req.getCookies())
                 .filter(c -> c.getName().equals(cookieName))
                 .findFirst()
