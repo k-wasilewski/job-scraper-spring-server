@@ -2,6 +2,8 @@ package com.example.jobscraperspringserver.security;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;

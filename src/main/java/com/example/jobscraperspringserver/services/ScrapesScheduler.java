@@ -27,7 +27,7 @@ public class ScrapesScheduler {
         List<Page> pages = mongoTemplate.findAll(Page.class);
         pages.stream().forEach(page -> {
             if (page.getLastScrapePerformed() == null || new Date().getTime() - page.getLastScrapePerformed().getTime() > page.getInterval()) {
-                scrapeRequestsSender.performScrapeRequest(JWT_TOKEN, page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages());
+                scrapeRequestsSender.performScrapeRequest(JWT_TOKEN, page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages(), page.getUserUuid());
                 page.setLastScrapePerformed(new Date());
                 mongoTemplate.save(page);
                 pagePublisher.publish(new Date().toString());

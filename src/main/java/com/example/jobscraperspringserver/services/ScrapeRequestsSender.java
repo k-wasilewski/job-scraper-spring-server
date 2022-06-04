@@ -27,7 +27,7 @@ public class ScrapeRequestsSender {
     private final String NODE_SERVER_ENDPOINT = "http://job-scraper-node-server:8080/graphql";
     private final String SPRING_SCRAPE_EMAIL = "spring_scrape";
 
-    public Date performScrapeRequest(String token, String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages) {
+    public Date performScrapeRequest(String token, String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages, String userUuid) {
         try {
             URL url = new URL(this.NODE_SERVER_ENDPOINT);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -42,8 +42,9 @@ public class ScrapeRequestsSender {
             String _path = path.replaceAll("\"", "&quot");
             String _jobAnchorSelector = jobAnchorSelector.replaceAll("\"", "&quot");
             String _jobLinkContains = jobLinkContains.replaceAll("\"", "&quot");
+            String _uuid = userUuid;
 
-            String jsonInputString = "{ \"query\": \"mutation { scrape(host: \\\"" + _host + "\\\", path: \\\"" + _path + "\\\", jobAnchorSelector: \\\"" + _jobAnchorSelector + "\\\", jobLinkContains: \\\"" + _jobLinkContains + "\\\", numberOfPages: " + numberOfPages + ") { complete } }\" }";
+            String jsonInputString = "{ \"query\": \"mutation { scrape(host: \\\"" + _host + "\\\", path: \\\"" + _path + "\\\", jobAnchorSelector: \\\"" + _jobAnchorSelector + "\\\", jobLinkContains: \\\"" + _jobLinkContains + "\\\", numberOfPages: " + numberOfPages + ", userUuid: \\\"" + _uuid + "\\\") { complete } }\" }";
 
             try (OutputStream os = con.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes("utf-8");

@@ -16,6 +16,7 @@ public class Page {
     private int numberOfPages;
     private int interval;
     private Date lastScrapePerformed;
+    private String userUuid;
 
     public Page() {
     }
@@ -86,5 +87,13 @@ public class Page {
 
     public void setLastScrapePerformed(Date lastScrapePerformed) {
         this.lastScrapePerformed = lastScrapePerformed;
+    }
+
+    public String getUserUuid() {
+        return userUuid;
+    }
+
+    public void setUserUuid(String userUuid) {
+        this.userUuid = userUuid;
     }
 }
