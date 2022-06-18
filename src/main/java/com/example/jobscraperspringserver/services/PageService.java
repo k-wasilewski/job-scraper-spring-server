@@ -1,7 +1,6 @@
 package com.example.jobscraperspringserver.services;
 
 import com.example.jobscraperspringserver.types.Page;
-import com.example.jobscraperspringserver.types.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
