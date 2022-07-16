@@ -72,7 +72,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin(NEXT_CLIENT_HOST != null ? NEXT_CLIENT_HOST : "http://localhost:3000");
+        config.addAllowedOrigin(NEXT_CLIENT_HOST != null ? "http://" + NEXT_CLIENT_HOST : "http://localhost:3000");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/graphql/**", config);

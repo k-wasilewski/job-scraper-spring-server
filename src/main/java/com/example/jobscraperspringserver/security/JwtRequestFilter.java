@@ -70,10 +70,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private String getCookieValue(HttpServletRequest req, String cookieName) {
-        return Arrays.stream(req.getCookies())
+        var cookies = req.getCookies();
+        return cookies != null ? Arrays.stream(req.getCookies())
                 .filter(c -> c.getName().equals(cookieName))
                 .findFirst()
                 .map(Cookie::getValue)
-                .orElse(null);
+                .orElse(null) : null;
     }
 }
