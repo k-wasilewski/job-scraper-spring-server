@@ -15,6 +15,6 @@ ARG JAR_FILE=/app/target/job-scraper-spring-server-0.0.1-SNAPSHOT.jar
 
 COPY --from=build ${JAR_FILE} job-scraper-spring-server.jar
 
-ENV NEXT_CLIENT_HOST="192.168.0.8:3000"
+ENV NEXT_CLIENT_HOST="192.168.0.8:80"
 
 ENTRYPOINT ["java","-Dsun.net.http.allowRestrictedHeaders=true","-jar","/job-scraper-spring-server.jar"]
