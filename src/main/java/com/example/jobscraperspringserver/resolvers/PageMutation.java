@@ -1,17 +1,20 @@
 package com.example.jobscraperspringserver.resolvers;
 
-import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+/*import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+//import graphql.kickstart.tools.GraphQLMutationResolver;
 import com.example.jobscraperspringserver.services.PageService;
 import com.example.jobscraperspringserver.types.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 @Component
 public class PageMutation implements GraphQLMutationResolver {
     @Autowired
     PageService pageService;
 
-    public Page addPage(String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages, int interval) {
+    public Publisher<Page> addPage(String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages, int interval) {
         Page page = new Page();
         page.setHost(host);
         page.setPath(path);
@@ -19,13 +22,14 @@ public class PageMutation implements GraphQLMutationResolver {
         page.setJobLinkContains(jobLinkContains);
         page.setNumberOfPages(numberOfPages);
         page.setInterval(interval);
-        return pageService.addPage(page); }
+        return pageService.addPage(page);
+    }
 
-    public Page deletePage(int id) {
+    public Publisher<Page> deletePage(int id) {
         return pageService.deletePage(id);
     }
 
-    public Page modifyPage(int id, String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages, int interval) {
+    public Publisher<Page> modifyPage(int id, String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages, int interval) {
         Page page = new Page();
         page.setHost(host);
         page.setPath(path);
@@ -35,4 +39,4 @@ public class PageMutation implements GraphQLMutationResolver {
         page.setInterval(interval);
         return pageService.modifyPage(id, page);
     }
-}
+}*/

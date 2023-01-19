@@ -2,7 +2,12 @@ package com.example.jobscraperspringserver.services;
 
 import com.example.jobscraperspringserver.security.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -23,9 +28,29 @@ public class ScrapeRequestsSender {
 
     @Autowired
     PageService pageService;
-
-    private final String NODE_SERVER_ENDPOINT = "http://job-scraper-node-server:8080/graphql";
+    private final String NODE_SERVER_ENDPOINT = "http://localhost:8080/graphql";
     private final String SPRING_SCRAPE_EMAIL = "spring_scrape";
+
+    WebClient nodeClient = WebClient.create(NODE_SERVER_ENDPOINT);
+
+    public void loginWebflux() {
+        try {
+            String jsonInputString = "{ \"query\": \"mutation { login(email: \\\"" + SPRING_SCRAPE_EMAIL + "\\\", password: \\\"" + JwtTokenUtil.JWT_SECRET + "\\\") { success, error { message }, user { email } } }\" }";
+
+            var status = nodeClient
+                    .post()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.ALL)
+                    .bodyValue(jsonInputString)
+                    .headers(httpHeaders -> {
+                        httpHeaders.set("Origin", "job-scraper-spring-server:8081");
+                    })
+                    .retrieve().bodyToMono(String.class);
+            System.out.println(status.block());
+        } catch (Exception ex) {
+            System.out.println("login webflux error: "+ex);
+        }
+    }
 
     public Date performScrapeRequest(String token, String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages, String userUuid) {
         try {

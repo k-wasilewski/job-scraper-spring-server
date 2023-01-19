@@ -5,17 +5,21 @@ import java.util.Collections;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
+import com.mongodb.reactivestreams.client.MongoClient;
+import com.mongodb.reactivestreams.client.MongoClients;
+//import com.mongodb.client.MongoClients;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
+import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = "com.example.jobscraperspringserver.repositories")
-public class MongoConfig extends AbstractMongoClientConfiguration {
+@EnableReactiveMongoRepositories(basePackages = "com.example.jobscraperspringserver.repositories")
+public class MongoConfig extends AbstractReactiveMongoConfiguration {
 
-    private final String MONGODB_ENDPOINT = "mongodb://sa:password@mongodb:27017/test?authSource=admin";
+    private final String MONGODB_ENDPOINT = "mongodb://sa:password@localhost:27017/scraping_db?authSource=admin";
 
     @Override
     protected String getDatabaseName() {
@@ -23,7 +27,7 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     }
 
     @Override
-    public MongoClient mongoClient() {
+    public MongoClient reactiveMongoClient() {
         ConnectionString connectionString = new ConnectionString(MONGODB_ENDPOINT);
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
                 .applyConnectionString(connectionString)
@@ -34,6 +38,6 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Override
     public Collection<String> getMappingBasePackages() {
-        return Collections.singleton("com.baeldung");
+        return Collections.singleton("com.example.jobscraperspringserver.repositories");
     }
 }

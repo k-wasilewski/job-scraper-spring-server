@@ -21,6 +21,10 @@ public class Page {
     public Page() {
     }
 
+    public Page(int id) {
+        this.id = id;
+    }
+
     public int getId() {
         return id;
     }

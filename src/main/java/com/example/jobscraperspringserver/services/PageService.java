@@ -3,64 +3,72 @@ package com.example.jobscraperspringserver.services;
 import com.example.jobscraperspringserver.types.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class PageService {
     @Autowired
-    MongoTemplate mongoTemplate;
+    ReactiveMongoTemplate mongoTemplate;
     @Autowired
     UserService userService;
 
-    public List<Page> getPages() {
+    public Flux<Page> getPages() {
+        System.out.println("getPages in service");
+        //String uuid = userService.getCurrentUserUuid();
+        //Query query = new Query();
+        //query.addCriteria(Criteria.where("userUuid").is(uuid));
+        //return mongoTemplate.find(query, Page.class);
+        //Flux<Page> pages = mongoTemplate.findAll(Page.class).doOnError(error -> System.out.println(error)).onErrorReturn(new Page(666));
+        //pages.subscribe(System.out::println);
+        return Flux.just(new Page(2)).doOnNext(page -> {
+            System.out.println("sdfdfd");
+        });
+    }
+
+    public Mono<Page> deletePage(int id) {
         String uuid = userService.getCurrentUserUuid();
         Query query = new Query();
         query.addCriteria(Criteria.where("userUuid").is(uuid));
-        return mongoTemplate.find(query, Page.class);
+        Mono<Page> toDelete;
+
+        return mongoTemplate.find(query, Page.class).take(1).single();
     }
 
-    public Page deletePage(int id) {
-        String uuid = userService.getCurrentUserUuid();
-        Query query = new Query();
-        query.addCriteria(Criteria.where("userUuid").is(uuid));
-        Page toDelete = mongoTemplate.find(query, Page.class).stream().filter(p -> p.getId() == id).findFirst().get();
-        if (mongoTemplate.remove(toDelete).getDeletedCount() == 1) {
-            return toDelete;
-        }
-        return null;
-    }
-
-    public Page modifyPage(int id, Page page) {
+    public Mono<Page> modifyPage(int id, Page page) {
         String uuid = userService.getCurrentUserUuid();
         page.setId(id);
         page.setUserUuid(uuid);
-        mongoTemplate.save(page);
-        return page;
+
+        return mongoTemplate.save(page);
     }
 
-    public Page addPage(Page page) {
+    public Mono<Page> addPage(Page page) {
         String uuid = userService.getCurrentUserUuid();
         page.setId(getHighestId() + 1);
         page.setUserUuid(uuid);
-        mongoTemplate.insert(page);
-        return page;
+
+        return mongoTemplate.insert(page);
     }
 
     private int getHighestId() {
         try {
-            return getAllPages().stream().max(Comparator.comparing(Page::getId)).get().getId();
+            return getAllPages().collectList().block().stream().max(Comparator.comparing(Page::getId)).get().getId();
         } catch (NoSuchElementException e) {
             return 0;
         }
     }
 
-    private List<Page> getAllPages() {
+    private Flux<Page> getAllPages() {
         return mongoTemplate.findAll(Page.class);
     }
 }

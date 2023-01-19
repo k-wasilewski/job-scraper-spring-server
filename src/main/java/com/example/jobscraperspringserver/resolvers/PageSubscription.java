@@ -1,6 +1,7 @@
 package com.example.jobscraperspringserver.resolvers;
 
-import com.coxautodev.graphql.tools.GraphQLSubscriptionResolver;
+/*import com.coxautodev.graphql.tools.GraphQLSubscriptionResolver;
+//import graphql.kickstart.tools.GraphQLSubscriptionResolver;
 import com.example.jobscraperspringserver.services.PagePublisher;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,4 +16,4 @@ public class PageSubscription implements GraphQLSubscriptionResolver {
     public Publisher<String> getScrapesPerformed() {
         return pagePublisher.getScrapesPublisher();
     }
-}
+}*/

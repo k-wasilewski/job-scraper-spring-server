@@ -2,7 +2,8 @@ package com.example.jobscraperspringserver.repositories;
 
 import com.example.jobscraperspringserver.types.Page;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 
-public interface PageMongoRepository extends MongoRepository <Page, Integer> {
+public interface PageMongoRepository extends ReactiveMongoRepository<Page, Integer> {
 
 }

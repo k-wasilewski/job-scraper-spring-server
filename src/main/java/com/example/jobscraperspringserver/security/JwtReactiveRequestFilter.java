@@ -3,11 +3,6 @@ package com.example.jobscraperspringserver.security;
 import java.io.IOException;
 import java.util.Arrays;
 
-/*import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;*/
 
 import com.example.jobscraperspringserver.services.UserService;
 import com.example.jobscraperspringserver.types.User;
@@ -21,18 +16,28 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import io.jsonwebtoken.ExpiredJwtException;
 
-/*@Component
-public class JwtRequestFilter extends OncePerRequestFilter {
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
+
+import org.springframework.http.HttpCookie;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+
+@Component
+public class JwtReactiveRequestFilter implements WebFilter {
     @Autowired
     private UserDetailsService jwtUserDetailsService;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
     UserService userService;
-
+ 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+    public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
+        
+        ServerHttpRequest request = serverWebExchange.getRequest();
+
         /*final String jwtToken = getCookieValue(request, "authToken");
         String email = null;
         String uuid = null;
@@ -40,7 +45,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         try {
             email = jwtTokenUtil.getEmailFromToken(jwtToken);
             uuid = jwtTokenUtil.getUuidFromToken(jwtToken);
-            User user = userService.findUserByEmail(email);
+            User user = userService.findUserByEmail(email).block();
             if (user == null || uuid == null || !user.getUuid().equals(uuid)) throw new IllegalArgumentException();
         } catch (IllegalArgumentException e) {
             System.out.println("Unable to get JWT Token");
@@ -57,24 +62,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource()
-                                .buildDetails(request));
+                usernamePasswordAuthenticationToken.setDetails(request);
 
                 SecurityContextHolder.getContext()
                         .setAuthentication(usernamePasswordAuthenticationToken);
             }
-        }
-*/
-        //chain.doFilter(request, response);
-    //}
+        }*/
 
-    /*private String getCookieValue(HttpServletRequest req, String cookieName) {
-        return Arrays.stream(req.getCookies())
->>>>>>> Stashed changes
-                .filter(c -> c.getName().equals(cookieName))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null) : null;
+        return webFilterChain.filter(serverWebExchange);
     }
-}*/
+
+    private String getCookieValue(ServerHttpRequest req, String cookieName) {
+        return req.getCookies().entrySet().stream()
+                .filter(c -> c.getKey().equals(cookieName))
+                .findFirst()
+                .map(c -> c.getValue())
+                .map(c -> c.get(0))
+                .map(HttpCookie::getValue)
+                .orElse(null);
+    }
+}
