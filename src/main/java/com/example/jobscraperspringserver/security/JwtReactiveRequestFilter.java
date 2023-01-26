@@ -1,19 +1,13 @@
 package com.example.jobscraperspringserver.security;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-
 import com.example.jobscraperspringserver.services.UserService;
 import com.example.jobscraperspringserver.types.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 import io.jsonwebtoken.ExpiredJwtException;
 
 import org.springframework.web.server.ServerWebExchange;
@@ -27,7 +21,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 @Component
 public class JwtReactiveRequestFilter implements WebFilter {
     @Autowired
-    private UserDetailsService jwtUserDetailsService;
+    private ReactiveUserDetailsService jwtUserDetailsService;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
@@ -35,10 +29,10 @@ public class JwtReactiveRequestFilter implements WebFilter {
  
     @Override
     public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
-        
+        System.out.println("filter called");    
         ServerHttpRequest request = serverWebExchange.getRequest();
 
-        /*final String jwtToken = getCookieValue(request, "authToken");
+        final String jwtToken = getCookieValue(request, "authToken");
         String email = null;
         String uuid = null;
 
@@ -55,7 +49,7 @@ public class JwtReactiveRequestFilter implements WebFilter {
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails =
-                    this.jwtUserDetailsService.loadUserByUsername(email);
+                    this.jwtUserDetailsService.findByUsername(email).block();
 
             if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
@@ -67,7 +61,7 @@ public class JwtReactiveRequestFilter implements WebFilter {
                 SecurityContextHolder.getContext()
                         .setAuthentication(usernamePasswordAuthenticationToken);
             }
-        }*/
+        }
 
         return webFilterChain.filter(serverWebExchange);
     }

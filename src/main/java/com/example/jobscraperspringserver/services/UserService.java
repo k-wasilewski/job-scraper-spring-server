@@ -2,14 +2,12 @@ package com.example.jobscraperspringserver.services;
 
 import com.example.jobscraperspringserver.types.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import java.security.Principal;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -18,8 +16,8 @@ public class UserService {
     ReactiveMongoTemplate mongoTemplate;
 
     public String getCurrentUserUuid() {
-        //UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String uuid = findUserByEmail("mock"/*principal.getUsername()*/).block().getUuid();
+        UserDetails principal = (UserDetails) ReactiveSecurityContextHolder.getContext().block().getAuthentication().getPrincipal();
+        String uuid = findUserByEmail(principal.getUsername()).block().getUuid();
         return uuid;
     }
 

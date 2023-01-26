@@ -6,19 +6,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
+import reactor.core.publisher.Mono;
 
 @Component
-public class JwtUserDetailsService implements UserDetailsService {
+public class JwtUserDetailsService implements ReactiveUserDetailsService {
     @Autowired
     UserService userService;
 
     @Override
-    public UserDetails loadUserByUsername(String email) {
+    public Mono<UserDetails> findByUsername(String email) {
+        System.out.println("user details called");
         User user = userService.findUserByEmail(email).block();
         if (user == null) throw new UsernameNotFoundException(email);
 
@@ -27,7 +29,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
         String encodedPassword = user.getPassword();
 
-        return new org.springframework.security.core.userdetails.User(
-                email, encodedPassword, grantedAuthorities);
+        return Mono.just(new org.springframework.security.core.userdetails.User(
+                email, encodedPassword, grantedAuthorities));
     }
 }

@@ -4,8 +4,10 @@ import com.example.jobscraperspringserver.security.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -28,16 +30,16 @@ public class ScrapeRequestsSender {
 
     @Autowired
     PageService pageService;
-    private final String NODE_SERVER_ENDPOINT = "http://localhost:8080/graphql";
+    private final String NODE_SERVER_ENDPOINT = "http://job-scraper-node-server:8080/graphql";
     private final String SPRING_SCRAPE_EMAIL = "spring_scrape";
 
     WebClient nodeClient = WebClient.create(NODE_SERVER_ENDPOINT);
 
-    public void loginWebflux() {
+    public List<Object> loginWebflux() {
         try {
             String jsonInputString = "{ \"query\": \"mutation { login(email: \\\"" + SPRING_SCRAPE_EMAIL + "\\\", password: \\\"" + JwtTokenUtil.JWT_SECRET + "\\\") { success, error { message }, user { email } } }\" }";
 
-            var status = nodeClient
+            var resp = nodeClient
                     .post()
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.ALL)
@@ -45,24 +47,17 @@ public class ScrapeRequestsSender {
                     .headers(httpHeaders -> {
                         httpHeaders.set("Origin", "job-scraper-spring-server:8081");
                     })
-                    .retrieve().bodyToMono(String.class);
-            System.out.println(status.block());
+                    .exchange();
+            return getToken(resp);
         } catch (Exception ex) {
             System.out.println("login webflux error: "+ex);
         }
+
+        return null;
     }
 
     public Date performScrapeRequest(String token, String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages, String userUuid) {
         try {
-            URL url = new URL(this.NODE_SERVER_ENDPOINT);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "*");
-            con.setRequestProperty("Origin", "job-scraper-spring-server:8081");
-            con.setRequestProperty("Cookie", "authToken=" + token + ";");
-            con.setDoOutput(true);
-
             String _host = host.replaceAll("\"", "&quot");
             String _path = path.replaceAll("\"", "&quot");
             String _jobAnchorSelector = jobAnchorSelector.replaceAll("\"", "&quot");
@@ -71,12 +66,21 @@ public class ScrapeRequestsSender {
 
             String jsonInputString = "{ \"query\": \"mutation { scrape(host: \\\"" + _host + "\\\", path: \\\"" + _path + "\\\", jobAnchorSelector: \\\"" + _jobAnchorSelector + "\\\", jobLinkContains: \\\"" + _jobLinkContains + "\\\", numberOfPages: " + numberOfPages + ", userUuid: \\\"" + _uuid + "\\\") { complete } }\" }";
 
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = jsonInputString.getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
+            var resp = nodeClient
+                    .post()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.ALL)
+                    .header("Origin", "job-scraper-spring-server:8081")
+                    .header("Cookie", "authToken=" + token + ";")
+                    .bodyValue(jsonInputString)
+                    .headers(httpHeaders -> {
+                        httpHeaders.set("Origin", "job-scraper-spring-server:8081");
+                    })
+                    .retrieve()
+                    .onStatus(httpStatus -> httpStatus != HttpStatus.OK, body -> null)
+                    .bodyToMono(String.class);
 
-            if (con.getResponseCode() == 200) return new Date();
+            if (resp.block() != null) return new Date();
         } catch (Exception e) {
             System.out.println("performScrapeRequest error: " + e);
         }
@@ -84,35 +88,13 @@ public class ScrapeRequestsSender {
         return null;
     }
 
-    public List<Object> login() {
-        try {
-            URL url = new URL(this.NODE_SERVER_ENDPOINT);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "*");
-            con.setRequestProperty("Origin", "job-scraper-spring-server:8081");
-            con.setDoOutput(true);
-
-            String jsonInputString = "{ \"query\": \"mutation { login(email: \\\"" + SPRING_SCRAPE_EMAIL + "\\\", password: \\\"" + JwtTokenUtil.JWT_SECRET + "\\\") { success, error { message }, user { email } } }\" }";
-
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = jsonInputString.getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
-
-            if (con.getResponseCode() == 200) return getToken(con);;
-        } catch (Exception e) {
-            System.out.println("login error: " + e);
-        }
-
-        return null;
-    }
-
-    private List<Object> getToken(HttpURLConnection con) {
+    private List<Object> getToken(Mono<ClientResponse> resp) {
         List<Object> tokenList = new ArrayList<>();
+        ResponseEntity response = resp.block().toBodilessEntity().block();
 
-        Map<String, List<String>> headerFields = con.getHeaderFields();
+        if (response.getStatusCode() != HttpStatus.OK) return null;
+
+        Map<String, List<String>> headerFields = response.getHeaders();
         Set<String> headerFieldsSet = headerFields.keySet();
         Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
 

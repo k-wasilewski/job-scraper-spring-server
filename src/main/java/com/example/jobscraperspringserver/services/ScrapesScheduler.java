@@ -2,7 +2,6 @@ package com.example.jobscraperspringserver.services;
 
 import com.example.jobscraperspringserver.types.Page;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -38,12 +37,12 @@ public class ScrapesScheduler {
     @Scheduled(fixedRate = 60000, initialDelay = 20000)
     public void checkAuthorization() {
         if (JWT_TOKEN_EXPIRATION == null || is5minBefore(JWT_TOKEN_EXPIRATION)) {
-            //List<Object> tokenExp = scrapeRequestsSender.login();
+            List<Object> tokenExp = scrapeRequestsSender.loginWebflux();
             scrapeRequestsSender.loginWebflux();
-            /*if (tokenExp != null) {
+            if (tokenExp != null) {
                 JWT_TOKEN = (String) tokenExp.get(0);
                 JWT_TOKEN_EXPIRATION = (Date) tokenExp.get(1);
-            }*/
+            }
         }
     }
 
