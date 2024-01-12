@@ -6,6 +6,8 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import reactor.core.publisher.Mono;
+
 import java.util.Date;
 import java.util.List;
 
@@ -23,26 +25,28 @@ public class ScrapesScheduler {
 
     @Scheduled(fixedRate = 60000, initialDelay = 80000)
     public void checkScrapesToPerform() {
-        List<Page> pages = mongoTemplate.findAll(Page.class).collectList().block();
-        pages.stream().forEach(page -> {
-            if (page.getLastScrapePerformed() == null || new Date().getTime() - page.getLastScrapePerformed().getTime() > page.getInterval()) {
-                scrapeRequestsSender.performScrapeRequest(JWT_TOKEN, page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages(), page.getUserUuid());
-                page.setLastScrapePerformed(new Date());
-                mongoTemplate.save(page);
-                pagePublisher.publish(new Date().toString());
-            }
+        pagePublisher.publish(new Date().toString());
+        mongoTemplate.findAll(Page.class).collectList().subscribe(pages -> {
+            pages.stream().forEach(page -> {
+                if (page.getLastScrapePerformed() == null || new Date().getTime() - page.getLastScrapePerformed().getTime() > page.getInterval()) {
+                    scrapeRequestsSender.performScrapeRequest(JWT_TOKEN, page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages(), page.getUserUuid());
+                    page.setLastScrapePerformed(new Date());
+                    mongoTemplate.save(page);
+                    pagePublisher.publish(new Date().toString());
+                }
+            });
         });
     }
 
     @Scheduled(fixedRate = 60000, initialDelay = 20000)
     public void checkAuthorization() {
         if (JWT_TOKEN_EXPIRATION == null || is5minBefore(JWT_TOKEN_EXPIRATION)) {
-            List<Object> tokenExp = scrapeRequestsSender.loginWebflux();
-            scrapeRequestsSender.loginWebflux();
-            if (tokenExp != null) {
-                JWT_TOKEN = (String) tokenExp.get(0);
-                JWT_TOKEN_EXPIRATION = (Date) tokenExp.get(1);
-            }
+            scrapeRequestsSender.loginWebflux().collectList().subscribe(tokenExp -> {
+                if (tokenExp != null) {
+                    JWT_TOKEN = (String) tokenExp.get(0);
+                    JWT_TOKEN_EXPIRATION = (Date) tokenExp.get(1);
+                }
+            });
         }
     }
 

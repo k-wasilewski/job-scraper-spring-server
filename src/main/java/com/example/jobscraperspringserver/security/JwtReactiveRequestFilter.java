@@ -4,7 +4,7 @@ import com.example.jobscraperspringserver.services.UserService;
 import com.example.jobscraperspringserver.types.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.stereotype.Component;
@@ -14,6 +14,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -28,8 +29,7 @@ public class JwtReactiveRequestFilter implements WebFilter {
     UserService userService;
  
     @Override
-    public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
-        System.out.println("filter called");    
+    public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {  
         ServerHttpRequest request = serverWebExchange.getRequest();
 
         final String jwtToken = getCookieValue(request, "authToken");
@@ -39,28 +39,35 @@ public class JwtReactiveRequestFilter implements WebFilter {
         try {
             email = jwtTokenUtil.getEmailFromToken(jwtToken);
             uuid = jwtTokenUtil.getUuidFromToken(jwtToken);
-            User user = userService.findUserByEmail(email).block();
-            if (user == null || uuid == null || !user.getUuid().equals(uuid)) throw new IllegalArgumentException();
+            final String finalUuid = uuid;
+
+            userService.findUserByEmail(email).subscribe(user -> {
+                if (user == null || finalUuid == null || !user.getUuid().equals(finalUuid)) {
+                    throw new IllegalArgumentException();
+                }
+            });
         } catch (IllegalArgumentException e) {
             System.out.println("Unable to get JWT Token");
         } catch (ExpiredJwtException e) {
             System.out.println("JWT Token has expired");
         }
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails =
-                    this.jwtUserDetailsService.findByUsername(email).block();
-
-            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+        if (email != null) {
+            return this.jwtUserDetailsService.findByUsername(email).flatMap(userDetails -> {
+                if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                         = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                                userDetails, null, userDetails.getAuthorities());
 
-                usernamePasswordAuthenticationToken.setDetails(request);
+                        usernamePasswordAuthenticationToken.setDetails(request);
 
-                SecurityContextHolder.getContext()
-                        .setAuthentication(usernamePasswordAuthenticationToken);
-            }
+                        Context ctx = ReactiveSecurityContextHolder.withAuthentication(usernamePasswordAuthenticationToken);
+                    
+                        return webFilterChain.filter(serverWebExchange).contextWrite(ctx);
+                    }
+
+                    return webFilterChain.filter(serverWebExchange);
+                });
         }
 
         return webFilterChain.filter(serverWebExchange);

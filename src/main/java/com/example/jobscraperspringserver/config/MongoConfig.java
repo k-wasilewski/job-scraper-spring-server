@@ -2,6 +2,7 @@ package com.example.jobscraperspringserver.config;
 
 import java.util.Collection;
 import java.util.Collections;
+import org.springframework.context.annotation.Bean;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -22,7 +23,7 @@ public class MongoConfig extends AbstractReactiveMongoConfiguration {
         return "scraping_db";
     }
 
-    @Override
+    @Bean
     public MongoClient reactiveMongoClient() {
         ConnectionString connectionString = new ConnectionString(MONGODB_ENDPOINT);
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder()

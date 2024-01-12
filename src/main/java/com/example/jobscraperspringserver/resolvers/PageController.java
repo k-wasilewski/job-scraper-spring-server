@@ -7,6 +7,8 @@ import org.springframework.graphql.data.method.annotation.SubscriptionMapping;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.stereotype.Controller;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import java.time.Duration;
 
 import com.example.jobscraperspringserver.services.PagePublisher;
 import com.example.jobscraperspringserver.services.PageService;
@@ -54,7 +56,8 @@ public class PageController {
     }
 
     @SubscriptionMapping("scrapesPerformed")
-    public Publisher<String> getScrapesPerformed() {
-        return pagePublisher.getScrapesPublisher();
+    public Flux<String> getScrapesPerformed() {
+        //return pagePublisher.getScrapesPublisher();
+        return Flux.interval(Duration.ofSeconds(1)).map(x -> "siemanko");
     }
 }

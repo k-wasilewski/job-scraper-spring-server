@@ -9,21 +9,25 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import com.example.jobscraperspringserver.repositories.UserMongoRepository;
 
 @Service
 public class UserService {
     @Autowired
     ReactiveMongoTemplate mongoTemplate;
+    @Autowired UserMongoRepository userMongoRepository;
 
-    public String getCurrentUserUuid() {
-        UserDetails principal = (UserDetails) ReactiveSecurityContextHolder.getContext().block().getAuthentication().getPrincipal();
-        String uuid = findUserByEmail(principal.getUsername()).block().getUuid();
-        return uuid;
+    public Mono<String> getCurrentUserUuid() {
+        return ReactiveSecurityContextHolder.getContext()
+            .flatMap(ctx -> {
+                UserDetails principal = (UserDetails) ctx.getAuthentication().getPrincipal();
+                return findUserByEmail(principal.getUsername()).flatMap(user -> Mono.just(user.getUuid()));
+            });
     }
 
     public Mono<User> findUserByEmail(String email) {
         Query query = new Query();
         query.addCriteria(Criteria.where("email").is(email));
-        return mongoTemplate.find(query, User.class).take(1).single();
+        return userMongoRepository.findFirstByEmail(email);
     }
 }

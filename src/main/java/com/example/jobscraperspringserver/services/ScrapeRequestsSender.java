@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -35,25 +36,29 @@ public class ScrapeRequestsSender {
 
     WebClient nodeClient = WebClient.create(NODE_SERVER_ENDPOINT);
 
-    public List<Object> loginWebflux() {
+    public Flux<Object> loginWebflux() {
         try {
             String jsonInputString = "{ \"query\": \"mutation { login(email: \\\"" + SPRING_SCRAPE_EMAIL + "\\\", password: \\\"" + JwtTokenUtil.JWT_SECRET + "\\\") { success, error { message }, user { email } } }\" }";
 
-            var resp = nodeClient
-                    .post()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.ALL)
-                    .bodyValue(jsonInputString)
-                    .headers(httpHeaders -> {
-                        httpHeaders.set("Origin", "job-scraper-spring-server:8081");
-                    })
-                    .exchange();
-            return getToken(resp);
+            return nodeClient
+                .post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.ALL)
+                .bodyValue(jsonInputString)
+                .headers(httpHeaders -> {
+                    httpHeaders.set("Origin", "job-scraper-spring-server:8081");
+                })
+                .exchange()
+                .flatMapMany(resp -> {
+                    return resp.toBodilessEntity().flatMapMany(response -> {
+                        return Flux.fromIterable(getToken(response));
+                    });
+                });
         } catch (Exception ex) {
             System.out.println("login webflux error: "+ex);
         }
 
-        return null;
+        return Flux.empty();
     }
 
     public Date performScrapeRequest(String token, String host, String path, String jobAnchorSelector, String jobLinkContains, int numberOfPages, String userUuid) {
@@ -88,9 +93,8 @@ public class ScrapeRequestsSender {
         return null;
     }
 
-    private List<Object> getToken(Mono<ClientResponse> resp) {
+    private List<Object> getToken(ResponseEntity response) {
         List<Object> tokenList = new ArrayList<>();
-        ResponseEntity response = resp.block().toBodilessEntity().block();
 
         if (response.getStatusCode() != HttpStatus.OK) return null;
 

@@ -20,16 +20,15 @@ public class JwtUserDetailsService implements ReactiveUserDetailsService {
 
     @Override
     public Mono<UserDetails> findByUsername(String email) {
-        System.out.println("user details called");
-        User user = userService.findUserByEmail(email).block();
-        if (user == null) throw new UsernameNotFoundException(email);
 
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
         grantedAuthorities.add(new SimpleGrantedAuthority("user"));
 
-        String encodedPassword = user.getPassword();
+        return userService.findUserByEmail(email).flatMap(user -> {
+            String encodedPassword = user.getPassword();
 
-        return Mono.just(new org.springframework.security.core.userdetails.User(
+            return Mono.just(new org.springframework.security.core.userdetails.User(
                 email, encodedPassword, grantedAuthorities));
+        });
     }
 }
