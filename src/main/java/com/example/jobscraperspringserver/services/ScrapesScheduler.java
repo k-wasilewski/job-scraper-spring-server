@@ -29,9 +29,9 @@ public class ScrapesScheduler {
                 scrapeRequestsSender.performScrapeRequest(JWT_TOKEN, page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages(), page.getUserUuid());
                 page.setLastScrapePerformed(new Date());
                 mongoTemplate.save(page);
-                pagePublisher.publish(new Date().toString());
             }
         });
+        pagePublisher.publish(new Date().toString());
     }
 
     @Scheduled(fixedRate = 60000, initialDelay = 20000)
