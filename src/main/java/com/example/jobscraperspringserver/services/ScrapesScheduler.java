@@ -26,12 +26,12 @@ public class ScrapesScheduler {
         List<Page> pages = mongoTemplate.findAll(Page.class);
         pages.stream().forEach(page -> {
             if (page.getLastScrapePerformed() == null || new Date().getTime() - page.getLastScrapePerformed().getTime() > page.getInterval()) {
+                pagePublisher.publish(new Date().toString());
                 scrapeRequestsSender.performScrapeRequest(JWT_TOKEN, page.getHost(), page.getPath(), page.getJobAnchorSelector(), page.getJobLinkContains(), page.getNumberOfPages(), page.getUserUuid());
                 page.setLastScrapePerformed(new Date());
                 mongoTemplate.save(page);
             }
         });
-        pagePublisher.publish(new Date().toString());
     }
 
     @Scheduled(fixedRate = 60000, initialDelay = 20000)
