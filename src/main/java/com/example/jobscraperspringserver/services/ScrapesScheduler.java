@@ -25,7 +25,6 @@ public class ScrapesScheduler {
 
     @Scheduled(fixedRate = 60000, initialDelay = 80000)
     public void checkScrapesToPerform() {
-        pagePublisher.publish(new Date().toString());
         mongoTemplate.findAll(Page.class).collectList().subscribe(pages -> {
             pages.stream().forEach(page -> {
                 if (page.getLastScrapePerformed() == null || new Date().getTime() - page.getLastScrapePerformed().getTime() > page.getInterval()) {
