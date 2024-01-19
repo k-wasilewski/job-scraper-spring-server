@@ -17,6 +17,10 @@ public class PagePublisher {
         this.sink = processor.sink();
     }
 
+    public FluxProcessor<String, String> getProcessor() {
+        return this.processor;
+    }
+
     public Publisher<String> getScrapesPublisher() {
         return processor.map(msg -> {
             System.out.println("Publishing message: " + msg);

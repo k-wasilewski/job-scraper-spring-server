@@ -6,28 +6,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
+import reactor.core.publisher.Mono;
 
 @Component
-public class JwtUserDetailsService implements UserDetailsService {
+public class JwtUserDetailsService implements ReactiveUserDetailsService {
     @Autowired
     UserService userService;
 
     @Override
-    public UserDetails loadUserByUsername(String email) {
-        User user = userService.findUserByEmail(email);
-        if (user == null) throw new UsernameNotFoundException(email);
+    public Mono<UserDetails> findByUsername(String email) {
 
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
         grantedAuthorities.add(new SimpleGrantedAuthority("user"));
 
-        String encodedPassword = user.getPassword();
+        return userService.findUserByEmail(email).flatMap(user -> {
+            String encodedPassword = user.getPassword();
 
-        return new org.springframework.security.core.userdetails.User(
-                email, encodedPassword, grantedAuthorities);
+            return Mono.just(new org.springframework.security.core.userdetails.User(
+                email, encodedPassword, grantedAuthorities));
+        });
     }
 }
