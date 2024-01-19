@@ -58,6 +58,5 @@ public class PageController {
     @SubscriptionMapping("scrapesPerformed")
     public Publisher<String> getScrapesPerformed() {
         return pagePublisher.getScrapesPublisher();
-        //return Flux.interval(Duration.ofSeconds(1)).map(x -> "siemanko");
     }
 }

@@ -13,12 +13,15 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class SecurityConfig {
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @Autowired
+    private JwtReactiveRequestFilter jwtReactiveRequestFilter;
     @Value("${nextClientHost}")
     private String NEXT_CLIENT_HOST;
 
@@ -32,10 +35,11 @@ public class SecurityConfig {
         return http.csrf().disable().cors().configurationSource(configurationSource()).and()
                 .authorizeExchange().pathMatchers(HttpMethod.OPTIONS,
                         "/**").permitAll()
-                //.and()
-                //.authorizeExchange().pathMatchers("/**").authenticated()
+                .and()
+                .authorizeExchange().pathMatchers("/graphql").authenticated()
                 .anyExchange().permitAll()
                 .and()
+                .addFilterAt(jwtReactiveRequestFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
