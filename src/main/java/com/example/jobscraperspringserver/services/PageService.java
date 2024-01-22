@@ -70,6 +70,7 @@ public class PageService {
     private Mono<Integer> getHighestId() {
         try {
             return getAllPages().collectList().flatMap(pages -> {
+                if (pages.isEmpty()) return Mono.just(0);
                 return Mono.just(pages.stream().max(Comparator.comparing(Page::getId)).get().getId());
             });
         } catch (NoSuchElementException e) {
