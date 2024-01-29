@@ -36,6 +36,13 @@ public class ScrapeRequestsSender {
 
     WebClient nodeClient = WebClient.create(NODE_SERVER_ENDPOINT);
 
+    public ScrapeRequestsSender() {}
+
+    public ScrapeRequestsSender(WebClient webClient, PageService pageService) {
+        this.nodeClient = webClient;
+        this.pageService = pageService;
+    }
+
     public Flux<Object> loginWebflux() {
         try {
             String jsonInputString = "{ \"query\": \"mutation { login(email: \\\"" + SPRING_SCRAPE_EMAIL + "\\\", password: \\\"" + JwtTokenUtil.JWT_SECRET + "\\\") { success, error { message }, user { email } } }\" }";
@@ -127,7 +134,7 @@ public class ScrapeRequestsSender {
                     if (tokenMat.find()) token = tokenMat.group(1);
 
                     Date expDate = null;
-                    SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzzz");;
+                    SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzzz");
                     try {
                         expDate = formatter.parse(expires);
                     } catch (ParseException e) {
