@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 import com.github.tomakehurst.wiremock.WireMockServer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -42,8 +43,6 @@ import java.util.Date;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, 
     properties = { "spring.data.mongodb.host=localhost" }
 )
-// @AutoConfigureDataMongo
-// @DataMongoTest
 public class ScrapeRequestsSenderTest {
 
     private ScrapeRequestsSender scrapeRequestsSender;
@@ -74,7 +73,7 @@ public class ScrapeRequestsSenderTest {
         SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzzz");
         String dateFormatted = formatter.format(date);
 
-        createNodeServerMockStub(dateFormatted, authToken);
+        createNodeServerLoginMockStub(dateFormatted, authToken);
 
         // WHEN
         Flux<Object> tokenFlux = scrapeRequestsSender.loginWebflux();
@@ -88,16 +87,40 @@ public class ScrapeRequestsSenderTest {
             })
             .expectComplete()
             .verify();
-
-        
     }
 
-    private void createNodeServerMockStub(String dateFormatted, String token) {
+    @Test
+    public void performScrapeRequestTest() {
+        // GIVEN
+        createNodeServerScrapeMockStub();
+        String jsonInputString = "{ \"query\": \"mutation { scrape(host: \\\"" + "host" + "\\\", path: \\\"" + "path" + "\\\", jobAnchorSelector: \\\"" + "jobAnchorSelector" + "\\\", jobLinkContains: \\\"" + "jobLinkContains" + "\\\", numberOfPages: " + 1 + ", userUuid: \\\"" + "userUuid" + "\\\") { complete } }\" }";
+
+        // WHEN
+        Date resp = scrapeRequestsSender.performScrapeRequest("myToken", "host", "path", "jobAnchorSelector", "jobLinkContains", 1, "userUuid");
+
+        // THEN
+        assertNotNull(resp);
+
+        wireMockServer.verify(postRequestedFor(urlEqualTo("/graphql"))
+            .withHeader("Origin", containing("job-scraper-spring-server:8081"))
+            .withHeader("Cookie", containing("authToken=myToken;"))
+            .withRequestBody(containing(jsonInputString)));      
+    }
+
+    private void createNodeServerLoginMockStub(String dateFormatted, String token) {
         wireMockServer.stubFor(post(urlEqualTo("/graphql"))
             .willReturn(aResponse()
                     .withStatus(200)
                     .withHeader("Set-Cookie", "authToken="+token+";Expires="+dateFormatted)
                     .withBody("okej"))
+            );
+    }
+
+    private void createNodeServerScrapeMockStub() {
+        wireMockServer.stubFor(post(urlEqualTo("/graphql"))
+            .willReturn(aResponse()
+                    .withStatus(200)
+                    .withBody("{ complete: true }"))
             );
     }
 }

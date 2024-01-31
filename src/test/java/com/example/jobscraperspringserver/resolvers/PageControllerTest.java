@@ -47,12 +47,12 @@ public class PageControllerTest {
 
     @Test
     void getPagesTest() {
+        // GIVEN
         Flux<Page> pages = Flux.just(new Page(1), new Page(2));
-
         String jsonInputString = "{ \"query\": \"{ getPages { id, host, path, jobAnchorSelector, jobLinkContains, numberOfPages, interval } }\" }";
-
         when(pageService.getPages()).thenReturn(pages);
 
+        // WHEN, THEN
         webTestClient
             .post()
             .uri("/graphql")
