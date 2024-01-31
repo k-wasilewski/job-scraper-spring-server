@@ -120,6 +120,32 @@ public class PageControllerTest {
             .jsonPath("$.data.deletePage.interval").isEqualTo(1);
     }
 
+    @Test
+    void modifyPageTest() {
+        // GIVEN
+        Mono<Page> page = Mono.just(createTestPage());
+        String jsonInputString = "{ \"query\": \"mutation { modifyPage(id: 0, host: \\\"" + "host" + "\\\", path: \\\"" + "path" + "\\\", jobAnchorSelector: \\\"" +"jobAnchorSelector" + "\\\", jobLinkContains: \\\"" + "jobLinkContains" + "\\\", numberOfPages: " + 1 + ", interval: " + 1 + ") { id, host, path, jobAnchorSelector, jobLinkContains, numberOfPages, interval } }\" }";
+        when(pageService.modifyPage(eq(0), any(Page.class))).thenReturn(page);
+
+        // WHEN, THEN
+        webTestClient
+            .post()
+            .uri("/graphql")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(jsonInputString)
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBody()
+            .jsonPath("$.data.modifyPage.id").isEqualTo(0)
+            .jsonPath("$.data.modifyPage.host").isEqualTo("host")
+            .jsonPath("$.data.modifyPage.path").isEqualTo("path")
+            .jsonPath("$.data.modifyPage.jobAnchorSelector").isEqualTo("jobAnchorSelector")
+            .jsonPath("$.data.modifyPage.jobLinkContains").isEqualTo("jobLinkContains")
+            .jsonPath("$.data.modifyPage.numberOfPages").isEqualTo(1)
+            .jsonPath("$.data.modifyPage.interval").isEqualTo(1);
+    }
+
     private Page createTestPage() {
         Page page = new Page();
         page.setHost("host");
