@@ -29,7 +29,19 @@ import static org.mockito.Mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Mono;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.reactive.socket.client.WebSocketClient;
+import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 
+import org.springframework.boot.web.server.LocalServerPort;
+
+import reactor.test.StepVerifier;
+import com.example.jobscraperspringserver.services.PagePublisher;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, 
@@ -39,8 +51,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 @WithMockUser(username="test@test.pl", password="pwd", roles="user")
 public class PageControllerTest {
 
+
+    @LocalServerPort
+    private int serverPort;
+
     @Autowired
     private WebTestClient webTestClient;
+    @Autowired
+    private PagePublisher pagePublisher;
 
     @MockBean
     private PageService pageService;
@@ -144,6 +162,26 @@ public class PageControllerTest {
             .jsonPath("$.data.modifyPage.jobLinkContains").isEqualTo("jobLinkContains")
             .jsonPath("$.data.modifyPage.numberOfPages").isEqualTo(1)
             .jsonPath("$.data.modifyPage.interval").isEqualTo(1);
+    }
+
+    @Test
+    void getScrapesPerformedTest() {
+        // GIVEN
+        String url = "http://localhost:"+serverPort+"/subscriptions";
+        WebSocketClient client = new ReactorNettyWebSocketClient();
+        WebSocketGraphQlTester graphQlTester = WebSocketGraphQlTester.builder(url, client).build();
+        String query = "subscription { scrapesPerformed }";
+
+        // WHEN
+        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+        exec.scheduleAtFixedRate(() -> pagePublisher.publish("siemanko"), 0, 1, TimeUnit.SECONDS);
+        Flux<String> respFlux = graphQlTester.document(query).executeSubscription().toFlux("scrapesPerformed", String.class);
+
+        // THEN
+         StepVerifier.create(respFlux)
+            .expectNext("siemanko")
+            .thenCancel()
+            .verify();
     }
 
     private Page createTestPage() {
