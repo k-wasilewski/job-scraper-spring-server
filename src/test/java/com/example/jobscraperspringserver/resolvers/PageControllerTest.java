@@ -94,6 +94,32 @@ public class PageControllerTest {
             .jsonPath("$.data.addPage.interval").isEqualTo(1);
     }
 
+    @Test
+    void deletePageTest() {
+        // GIVEN
+        Mono<Page> page = Mono.just(createTestPage());
+        String jsonInputString = "{ \"query\": \"mutation { deletePage(id: " + 0 + ") { id, host, path, jobAnchorSelector, jobLinkContains, numberOfPages, interval } }\" }";
+        when(pageService.deletePage(0)).thenReturn(page);
+
+        // WHEN, THEN
+        webTestClient
+            .post()
+            .uri("/graphql")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(jsonInputString)
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBody()
+            .jsonPath("$.data.deletePage.id").isEqualTo(0)
+            .jsonPath("$.data.deletePage.host").isEqualTo("host")
+            .jsonPath("$.data.deletePage.path").isEqualTo("path")
+            .jsonPath("$.data.deletePage.jobAnchorSelector").isEqualTo("jobAnchorSelector")
+            .jsonPath("$.data.deletePage.jobLinkContains").isEqualTo("jobLinkContains")
+            .jsonPath("$.data.deletePage.numberOfPages").isEqualTo(1)
+            .jsonPath("$.data.deletePage.interval").isEqualTo(1);
+    }
+
     private Page createTestPage() {
         Page page = new Page();
         page.setHost("host");
