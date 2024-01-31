@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
-
+import reactor.core.publisher.Mono;
 import org.springframework.security.test.context.support.WithMockUser;
 
 
@@ -68,4 +68,40 @@ public class PageControllerTest {
             .jsonPath("$.data.getPages[1].id").isEqualTo(2);
     }
 
+    @Test
+    void addPageTest() {
+        // GIVEN
+        Mono<Page> page = Mono.just(createTestPage());
+        String jsonInputString = "{ \"query\": \"mutation { addPage(host: \\\"" + "host" + "\\\", path: \\\"" + "path" + "\\\", jobAnchorSelector: \\\"" +"jobAnchorSelector" + "\\\", jobLinkContains: \\\"" + "jobLinkContains" + "\\\", numberOfPages: " + 1 + ", interval: " + 1 + ") { id, host, path, jobAnchorSelector, jobLinkContains, numberOfPages, interval } }\" }";
+        when(pageService.addPage(any(Page.class))).thenReturn(page);
+
+        // WHEN, THEN
+        webTestClient
+            .post()
+            .uri("/graphql")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(jsonInputString)
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBody()
+            .jsonPath("$.data.addPage.id").isEqualTo(0)
+            .jsonPath("$.data.addPage.host").isEqualTo("host")
+            .jsonPath("$.data.addPage.path").isEqualTo("path")
+            .jsonPath("$.data.addPage.jobAnchorSelector").isEqualTo("jobAnchorSelector")
+            .jsonPath("$.data.addPage.jobLinkContains").isEqualTo("jobLinkContains")
+            .jsonPath("$.data.addPage.numberOfPages").isEqualTo(1)
+            .jsonPath("$.data.addPage.interval").isEqualTo(1);
+    }
+
+    private Page createTestPage() {
+        Page page = new Page();
+        page.setHost("host");
+        page.setPath("path");
+        page.setJobAnchorSelector("jobAnchorSelector");
+        page.setJobLinkContains("jobLinkContains");
+        page.setNumberOfPages(1);
+        page.setInterval(1);
+        return page;
+    }
 }
