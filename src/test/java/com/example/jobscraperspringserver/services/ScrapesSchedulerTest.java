@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.lang.*;
+import java.lang.reflect.Field;
 
 import com.example.jobscraperspringserver.types.Page;
 
@@ -76,5 +77,51 @@ public class ScrapesSchedulerTest {
         assertTrue(capturedPage.getId() == p1.getId());
 
         assertTrue(capturedPage.getLastScrapePerformed().after(p1Date));
+    }
+
+    @Test
+    public void checkAuthorizationTest() {
+        // GIVEN
+        Date expSoon = new Date();
+        Calendar c = Calendar.getInstance(); 
+        c.setTime(expSoon); 
+        c.add(Calendar.MINUTE, 3);
+        expSoon = c.getTime();
+
+        Field jwtTokenField = null;
+        Field jwtTokenExpirationField = null;
+        try {
+            jwtTokenField = ScrapesScheduler.class.getDeclaredField("JWT_TOKEN");
+            jwtTokenExpirationField = ScrapesScheduler.class.getDeclaredField("JWT_TOKEN_EXPIRATION");
+        } catch (NoSuchFieldException e) {
+            assertTrue(true == false);
+        }
+        try {
+            jwtTokenField.setAccessible(true);
+            jwtTokenExpirationField.setAccessible(true);
+            jwtTokenExpirationField.set(scrapesScheduler, expSoon);
+        } catch (IllegalAccessException e) {
+            assertTrue(true == false);
+        }
+        
+        String mockToken = "abc";
+        Date mockDate = new Date(200, 1, 1);
+        Flux<Object> token = Flux.fromIterable(List.of(mockToken, mockDate));
+        when(scrapeRequestsSender.loginWebflux()).thenReturn(token);
+
+        // WHEN
+        scrapesScheduler.checkAuthorization();
+
+        // THEN
+        String JWT_TOKEN = null;
+        Date JWT_TOKEN_EXPIRATION = null;
+        try {
+            JWT_TOKEN = (String) jwtTokenField.get(scrapesScheduler);
+            JWT_TOKEN_EXPIRATION = (Date) jwtTokenExpirationField.get(scrapesScheduler);
+        } catch (IllegalAccessException e) {
+            assertTrue(true == false);
+        }
+        assertTrue(JWT_TOKEN.equals(mockToken));
+        assertTrue(JWT_TOKEN_EXPIRATION.equals(mockDate));
     }
 }
