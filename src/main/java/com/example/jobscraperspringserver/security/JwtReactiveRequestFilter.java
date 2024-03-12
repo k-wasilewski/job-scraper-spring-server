@@ -33,41 +33,37 @@ public class JwtReactiveRequestFilter implements WebFilter {
         ServerHttpRequest request = serverWebExchange.getRequest();
 
         final String jwtToken = getCookieValue(request, "authToken");
-        String email = null;
-        String uuid = null;
 
         try {
-            email = jwtTokenUtil.getEmailFromToken(jwtToken);
-            uuid = jwtTokenUtil.getUuidFromToken(jwtToken);
-            final String finalUuid = uuid;
+            final String email = jwtTokenUtil.getEmailFromToken(jwtToken);
+            final String uuid = jwtTokenUtil.getUuidFromToken(jwtToken);
 
-            userService.findUserByEmail(email).subscribe(user -> {
-                if (user == null || finalUuid == null || !user.getUuid().equals(finalUuid)) {
-                    throw new IllegalArgumentException();
+            return userService.findUserByEmail(email).flatMap(u -> {
+                if (u == null || uuid == null || !u.getUuid().equals(uuid)) {
+                    System.out.println("Unable to find a user from JWT Token");
+                } else if (email != null) {
+                    return this.jwtUserDetailsService.findByUsername(email).flatMap(userDetails -> {
+                        if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+                            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+                                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                            usernamePasswordAuthenticationToken.setDetails(request);
+
+                            Context ctx = ReactiveSecurityContextHolder.withAuthentication(usernamePasswordAuthenticationToken);
+                    
+                            return webFilterChain.filter(serverWebExchange).contextWrite(ctx);
+                        }
+
+                        return webFilterChain.filter(serverWebExchange);
+                    });
                 }
+
+                return webFilterChain.filter(serverWebExchange);
             });
         } catch (IllegalArgumentException e) {
             System.out.println("Unable to get JWT Token");
         } catch (ExpiredJwtException e) {
             System.out.println("JWT Token has expired");
-        }
-
-        if (email != null) {
-            return this.jwtUserDetailsService.findByUsername(email).flatMap(userDetails -> {
-                if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                        = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-
-                        usernamePasswordAuthenticationToken.setDetails(request);
-
-                        Context ctx = ReactiveSecurityContextHolder.withAuthentication(usernamePasswordAuthenticationToken);
-                    
-                        return webFilterChain.filter(serverWebExchange).contextWrite(ctx);
-                    }
-
-                    return webFilterChain.filter(serverWebExchange);
-                });
         }
 
         return webFilterChain.filter(serverWebExchange);
